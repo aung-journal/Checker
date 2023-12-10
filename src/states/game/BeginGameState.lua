@@ -6,9 +6,6 @@ function BeginGameState:init()
     self.transitionAlpha = 1
 end
 
-function BeginGameState:enter(def)
-end
-
 function BeginGameState:update(dt)
     --self.level = def.level
 
