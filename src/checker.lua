@@ -345,7 +345,7 @@ function max_value(board, alpha, beta, depth)
     return {best_action, max_value}
 end 
 
-function min_max(board, depth)
+function minimax(board, depth)
     local result_value
     if player(board) == X then
         result_value = max_value(board, -math.huge, math.huge, depth)

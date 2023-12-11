@@ -4,7 +4,7 @@ require 'src/Dependencies'
 function love.load()
     math.randomseed(os.time())
     --love.graphics.setDefaultFilter('')
-    love.window.setTitle('Checker')
+    love.window.setTitle('Checker Bot')
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -12,8 +12,13 @@ function love.load()
         resizable = true
     })
 
-    gStateStack = StateStack()
-    gStateStack:push(BeginGameState())
+    gStateMachine = StateMachine {
+        ['begin-game'] = function() return BeginGameState() end,
+        ['start'] = function() return StartState() end,
+        ['play'] = function() return PlayState() end
+    }
+
+    gStateMachine:change('begin-game')
 
     gSounds['music']:setLooping(true)
     gSounds['music']:play()
@@ -45,13 +50,13 @@ end
 function love.update(dt)
     Timer.update(dt)
     Control.update(dt)
-    gStateStack:update(dt)
+    gStateMachine:update(dt)
 
     love.mouse.keysPressed = {}
 end
 
 function love.draw()
     push:start()
-    gStateStack:render()
+    gStateMachine:render()
     push:finish()
 end

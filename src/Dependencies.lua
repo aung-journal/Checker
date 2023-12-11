@@ -11,19 +11,22 @@ require 'src/Util'
 --states
 require 'src/states/BaseState'
 require 'src/states/StateStack'
+require 'src/StateMachine'
 
 --game states
 require 'src/states/game/BeginGameState'
 require 'src/states/game/StartState'
+require 'src/states/game/PlayState'
 
 gTextures = {
     ['logo'] = love.graphics.newImage('graphics/logo.jpeg')
 }
 
 gFonts = {
-    ['medium'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 28),
-    ['large'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 40),
-    ['title'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 60)
+    ['small'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 28),
+    ['medium'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 56),
+    ['large'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 80),
+    ['title'] = love.graphics.newFont('fonts/OpenSans-Regular.ttf', 120)
 }
 
 gSounds = {
