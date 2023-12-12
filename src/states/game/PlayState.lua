@@ -11,6 +11,9 @@ function PlayState:init()
     self.game_over = checker.terminal(self.board)
     self.player = checker.player(self.board)
     self.move = checker.EMPTY
+    self.rect = checker.EMPTY--this is to store everything like x, y
+    self.selected = {false, {checker.EMPTY, checker.EMPTY}} --this is to indicate if a piece have been selected
+    --the second item is for index of that selected piece
 end
 
 function PlayState:enter(def)
@@ -30,22 +33,59 @@ function PlayState:update(dt)
     end
 
     --Check for a user move
+    --I will later add dots to indicate possible legal moves
     if love.mouse.wasPressed(1) and self.user == self.player and not self.game_over then
-        local mouseX, mouseY = push:toGame(love.mouse.getPosition())
         for i = 1, 8 do
             for j = 1, 8 do
-                if (board[i][j] == checker.EMPTY and )
+                --this checks if you have clicked a piece
+                if (self.board[i][j] != checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j))) then
+                    self.selected = {true, {i, j}}
+                --this checks if you have selected a piece and click on an empty square
+                elseif (self.board[i][j] == checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j)) and self.selected[1]) then
+                    self.board = checker.result(self.board, {self.selected[2], {i, j}})
+                --this checks if you have selected a piece and click on another piece again
+                elseif (self.board[i][j] != checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j)) and self.selected[1]) then
+                    self.selected = {true, {i, j}}
+                end
+            end
+        end
+    end
 end
 
 function PlayState:render()
 
 end
 
+function PlayState:find_board_coordinates(i, j)
+    local tile_size = 80
+    local tile_origin = {VIRTUAL_WIDTH / 2 - (1.5 * tile_size),
+                        VIRTUAL_HEIGHT / 2 - (1.5 * tile_size)}
+    local rect = {
+        x = tile_origin[1] + j * tile_size,
+        y = tile_origin[2] + i * tile_size,
+        width = tile_size,
+        height = tile_size
+    }
+    return rect
+end
+
+function PlayState:collidepoint(object)
+    local mouseX, mouseY = push:toGame(love.mouse.getPosition())
+    
+    -- Check if the mouse is within the bounding box of the object
+    if mouseX >= object.x and mouseX <= object.x + object.width and
+       mouseY >= object.y and mouseY <= object.y + object.height then
+        return true
+    end
+
+    return false
+end
+
 --drawing game board
 function PlayState:draw_board(board)
     local tile_size = 80
-    local tile_origin = {width / 2 - (1.5 * tile_size),
-                        height / 2 - (1.5 * tile_size)}
+    local tile_origin = {VIRTUAL_WIDTH / 2 - (1.5 * tile_size),
+                        VIRTUAL_HEIGHT / 2 - (1.5 * tile_size)}
     local tiles = {}
     for i = 1, 8 do
         local row = {}

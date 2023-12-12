@@ -6,18 +6,23 @@ function BeginGameState:init()
     self.transitionAlpha = 1
 end
 
-function BeginGameState:update(dt)
+function BeginGameState:enter(def)
+    --self.level = def.level
+
     Timer.tween(2, {
         [self] = {transitionAlpha = 0}
-    }):finish(function ()
-        Timer.after(2, function()
-            Timer.tween(2, {
-                [self] = {transitionAlpha = 1}
-            }):finish(function ()
-                gStateMachine:change('start')
-            end)
+    })
+    :finish(function ()
+        Timer.tween(2, {
+            [self] = {transitionAlpha = 1}
+        }):finish(function ()
+            gStateMachine:change('start')
         end)
     end)
+end
+
+function BeginGameState:update(dt)
+    Timer.update(dt)
 end
 
 function BeginGameState:render()
