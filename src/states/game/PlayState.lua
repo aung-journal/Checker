@@ -10,7 +10,7 @@ function PlayState:init()
     self.ai_turn = false
     self.game_over = checker.terminal(self.board)
     self.player = checker.player(self.board)
-    self.move = nil
+    self.move = checker.EMPTY
 end
 
 function PlayState:enter(def)
