@@ -1,7 +1,7 @@
-checker = require 'src/checker'
 push = require 'lib/push'
 Timer = require 'lib/knife.timer'
 Class = require 'lib/class'
+checker = require 'src/checker'
 
 --other files
 require 'src/constants'

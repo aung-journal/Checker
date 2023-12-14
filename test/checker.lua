@@ -1,3 +1,5 @@
+Class = require 'class'
+
 X = "X" --player 1
 O = "O" -- player 2
 X_KING = "XK"
@@ -16,8 +18,9 @@ TOURANMENT = false
 HISTORY = {}
 MOVE_COUNT = 0
 
+checker = Class{}
 
-function initial_state()
+function checker:initial_state()
     local board = {}
     
     for i = 1, 8 do
@@ -41,7 +44,7 @@ function initial_state()
     return board
 end
 
-function player(board)
+function checker:player(board)
     local count_X = 0
     local count_O = 0
     
@@ -63,7 +66,7 @@ function player(board)
     end
 end
 
-function jump_moves(board, i, j, play, current_moves)
+function checker:jump_moves(board, i, j, play, current_moves)
     local possible_moves = current_moves or {}
     local turn = play or player(board)
 
@@ -71,12 +74,12 @@ function jump_moves(board, i, j, play, current_moves)
         -- Check possible jumps for Player 1 (player(board))
         local jump_moves
 
-        if board[i][j] == X then
+        if board[i][j] == O then
             jump_moves = {
                 {i - 2, j - 2},
                 {i - 2, j + 2}
             }
-        elseif board[i][j] == O then
+        elseif board[i][j] == X then
             jump_moves = {
                 {i + 2, j - 2},
                 {i + 2, j + 2}
@@ -91,7 +94,13 @@ function jump_moves(board, i, j, play, current_moves)
         end  
 
         for _, jump in ipairs(jump_moves) do
-            local new_i, new_j = table.unpack(jump)
+            local new_i, new_j
+
+            if not jump[1] or not jump[2] then
+                new_i, new_j = -1, -1
+            else
+                new_i, new_j = jump[1], jump[2]
+            end
             
             -- Check if the new position is within the board boundaries
             if new_i >= 1 and new_i <= 8 and new_j >= 1 and new_j <= 8 then
@@ -109,8 +118,8 @@ function jump_moves(board, i, j, play, current_moves)
                         table.insert(new_moves, jump)
 
                         
-                        -- Recursively call the function to find additional jumps
-                        local next_moves = jump_moves(board, new_i, new_j, new_moves)
+                        -- Recursively call the function checker:to find additional jumps
+                        local next_moves = self:jump_moves(board, new_i, new_j, new_moves)
                         
                         for _, next_move in ipairs(next_moves) do
                             table.insert(possible_moves, next_move)
@@ -124,7 +133,7 @@ function jump_moves(board, i, j, play, current_moves)
     return possible_moves
 end
 
-function diagonal_moves(board, i, j, turn)
+function checker:diagonal_moves(board, i, j, turn)
     local possible_moves = {}
     local play = turn or player(board)
 
@@ -151,7 +160,13 @@ function diagonal_moves(board, i, j, turn)
         end
 
         for _, move in ipairs(diagonal_moves) do
-            local new_i, new_j = table.unpack(move)
+            local new_i, new_j
+
+            if not move[1] or not move[2] then
+                new_i, new_j = -1, -1
+            else
+                new_i, new_j = move[1], move[2]
+            end
             
             -- Check if the new position is within the board boundaries
             if new_i >= 1 and new_i <= 8 and new_j >= 1 and new_j <= 8 then
@@ -167,7 +182,7 @@ function diagonal_moves(board, i, j, turn)
 end
 
 
-function actions(board, play)
+function checker:actions(board, play)
     -- Returns a set of all possible actions available on the board.
     local moves = {}
 
@@ -175,8 +190,8 @@ function actions(board, play)
     for i, row in ipairs(board) do
         for j, _ in ipairs(row) do
             if board[i][j] == turn then
-                local jump_moves_result = jump_moves(board, i, j, play)
-                local diagonal_moves_result = diagonal_moves(board, i, j, play)
+                local jump_moves_result = self:jump_moves(board, i, j, play)
+                local diagonal_moves_result = self:diagonal_moves(board, i, j, play)
 
                 if #jump_moves_result > 0 then
                     moves[{i, j}] = jump_moves_result
@@ -191,7 +206,7 @@ function actions(board, play)
 end
 
 
-function result(board, action)
+function checker:result(board, action)
     --the action is in the form {{i, j}, {ni, nj}}
     local newBoard = board
 
@@ -212,7 +227,7 @@ function result(board, action)
     end
 end
 
-function are_positions_equal(board1, board2)
+function checker:are_positions_equal(board1, board2)
     -- Check if two board positions are equal
     for i, row in ipairs(board1) do
         for j, piece in ipairs(row) do
@@ -225,9 +240,9 @@ function are_positions_equal(board1, board2)
     return true
 end
 
-function check_stale(board, play) --this checks if enemey is not able to make moves or not
+function checker:check_stale(board, play) --this checks if enemey is not able to make moves or not
     local turn = (play == X) and O or X
-    local acts = actions(board, turn)
+    local acts = self:actions(board, turn)
     if #acts == 0 then
         return true
     else
@@ -235,11 +250,11 @@ function check_stale(board, play) --this checks if enemey is not able to make mo
     end
 end
 
-function is_threefold_repetition(board, history)
+function checker:is_threefold_repetition(board, history)
     -- Check if the current board position has occurred three times
     local count = 0
     for _, past_board in ipairs(history) do
-        if are_positions_equal(board, past_board) then
+        if self:are_positions_equal(board, past_board) then
             count = count + 1
             if count == 3 then
                 return true  -- Threefold repetition, it's a draw
@@ -250,7 +265,7 @@ function is_threefold_repetition(board, history)
     return false
 end
 
--- function is_fifty_move_rule(board, move_count)
+-- function checker:is_fifty_move_rule(board, move_count)
 --     -- Check if fifty moves have been made without any captures
 --     if move_count >= 100 and COUNT_X then
 --         return true  -- Fifty-move rule without capture, it's a draw
@@ -259,40 +274,40 @@ end
 --     return false
 -- end
 
-function check_draws(board) -- this check draws and tournament rules are not included yet
-    return is_threefold_repetition(board, HISTORY) --or is_fifty_move_rule(board, MOVE_COUNT)
+function checker:check_draws(board) -- this check draws and tournament rules are not included yet
+    return self:is_threefold_repetition(board, HISTORY) --or is_fifty_move_rule(board, MOVE_COUNT)
 end
 
-function winner(board)
-    if COUNT_X == 0 or check_stale(board, O) then
+function checker:winner(board)
+    if COUNT_X == 0 or self:check_stale(board, O) then
         return X
-    elseif COUNT_O == 0 or check_stale(board, X) then
+    elseif COUNT_O == 0 or self:check_stale(board, X) then
         return O
     else
         return EMPTY
     end
 end
 
-function terminal(board)
-    return winner(board) or check_draws(board)
+function checker:terminal(board)
+    return self:winner(board) or self:check_draws(board)
 end
 
-function utility(board)
-    if winner(board) == X then
+function checker:utility(board)
+    if self:winner(board) == X then
         return 1
-    elseif winner(board) == O then
+    elseif self:winner(board) == O then
         return -1
     else
         return 0
     end
 end
 
-function min_value(board, alpha, beta, depth)
-    if terminal(board) or depth == 0 then
-        if terminal(board) then
-            return {EMPTY, utility(board)}
+function checker:min_value(board, alpha, beta, depth)
+    if self:terminal(board) or depth == 0 then
+        if self:terminal(board) then
+            return {EMPTY, self:utility(board)}
         else
-            return {EMPTY, evaluate_board(board)}
+            return {EMPTY, self:evaluate_board(board)}
         end
     end
 
@@ -301,7 +316,7 @@ function min_value(board, alpha, beta, depth)
     local actions_list = actions(board, O)
 
     for location, action in pairs(actions_list) do
-        local result_value = max_value(result(board, {location, action}), alpha, beta, depth - 1)
+        local result_value = max_value(self:result(board, {location, action}), alpha, beta, depth - 1)
 
         local value = result_value[2]  -- Use the second element of the result_value table
         if value < min_value then
@@ -318,7 +333,7 @@ function min_value(board, alpha, beta, depth)
     return {best_action, min_value}
 end
 
-function max_value(board, alpha, beta, depth)
+function checker:max_value(board, alpha, beta, depth)
     if terminal(board) then
         return {EMPTY, utility(board)}
     end
@@ -328,7 +343,7 @@ function max_value(board, alpha, beta, depth)
     local actions_list = actions(board, X)
 
     for _, action in pairs(actions_list) do
-        local result_value = min_value(result(board, action), alpha, beta, depth - 1)
+        local result_value = min_value(self:result(board, action), alpha, beta, depth - 1)
 
         local value = result_value[2]  -- Use the second element of the result_value table
         if value > max_value then
@@ -345,7 +360,7 @@ function max_value(board, alpha, beta, depth)
     return {best_action, max_value}
 end 
 
-function minimax(board, depth)
+function checker:minimax(board, depth)
     local result_value
     if player(board) == X then
         result_value = max_value(board, -math.huge, math.huge, depth)
@@ -356,7 +371,7 @@ function minimax(board, depth)
     end
 end--I want to implement depth-limited min-max algorithm
 
-function evaluate_board(board)
+function checker:evaluate_board(board)
     local evaluation = 0
 
     -- Material Count
@@ -375,26 +390,26 @@ function evaluate_board(board)
     end
 
     -- Piece Mobility
-    local mobility_X = count_piece_mobility(board, X)
-    local mobility_O = count_piece_mobility(board, O)
+    local mobility_X = self:count_piece_mobility(board, X)
+    local mobility_O = self:count_piece_mobility(board, O)
     evaluation = evaluation + (mobility_X - mobility_O)
 
     -- King Safety (simple assessment based on their row)
-    evaluation = evaluation + king_safety(board)
+    evaluation = evaluation + self:king_safety(board)
 
     -- Pawn Structure
-    evaluation = evaluation + pawn_structure(board)
+    evaluation = evaluation + self:pawn_structure(board)
 
     -- Control of the Center
-    evaluation = evaluation + control_of_center(board)
+    evaluation = evaluation + self:control_of_center(board)
 
     -- Forced Jumps and Double Jumps
-    evaluation = evaluation + count_forced_jumps(board, X) - count_forced_jumps(board, O)
+    evaluation = evaluation + self:count_forced_jumps(board, X) - self:count_forced_jumps(board, O)
 
     return evaluation
 end
 
-function count_piece_mobility(board, player)
+function checker:count_piece_mobility(board, player)
     local mobility = 0
 
     -- Count available moves for each piece
@@ -402,8 +417,8 @@ function count_piece_mobility(board, player)
         for j, piece in ipairs(row) do
             if piece == player then
                 local moves
-                local jump_moves_result = jump_moves(board, i, j)
-                local diagonal_moves_result = diagonal_moves(board, i, j)
+                local jump_moves_result = self:jump_moves(board, i, j)
+                local diagonal_moves_result = self:diagonal_moves(board, i, j)
 
                 if #jump_moves_result > 0 then
                     moves = jump_moves_result
@@ -418,7 +433,7 @@ function count_piece_mobility(board, player)
     return mobility
 end
 
-function king_safety(board)
+function checker:king_safety(board)
     local king_safety_X = 0
     local king_safety_O = 0
 
@@ -435,7 +450,7 @@ function king_safety(board)
     return king_safety_X - king_safety_O
 end
 
-function pawn_structure(board)
+function checker:pawn_structure(board)
     local pawn_structure_X = 0
     local pawn_structure_O = 0
 
@@ -452,7 +467,7 @@ function pawn_structure(board)
     return pawn_structure_X - pawn_structure_O
 end
 
-function control_of_center(board)
+function checker:control_of_center(board)
     local center_control_X = 0
     local center_control_O = 0
 
@@ -469,13 +484,13 @@ function control_of_center(board)
     return center_control_X - center_control_O
 end
 
-function count_forced_jumps(board, player)
+function checker:count_forced_jumps(board, player)
     local forced_jumps = 0
 
     for i, row in ipairs(board) do
         for j, piece in ipairs(row) do
             if piece == player then
-                local jump_moves_result = jump_moves(board, i, j)
+                local jump_moves_result = self:jump_moves(board, i, j)
                 if #jump_moves_result > 0 then
                     forced_jumps = forced_jumps + 1
                 end

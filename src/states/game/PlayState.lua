@@ -38,13 +38,13 @@ function PlayState:update(dt)
         for i = 1, 8 do
             for j = 1, 8 do
                 --this checks if you have clicked a piece
-                if (self.board[i][j] != checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j))) then
+                if (self.board[i][j] ~= checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j))) then
                     self.selected = {true, {i, j}}
                 --this checks if you have selected a piece and click on an empty square
                 elseif (self.board[i][j] == checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j)) and self.selected[1]) then
                     self.board = checker.result(self.board, {self.selected[2], {i, j}})
                 --this checks if you have selected a piece and click on another piece again
-                elseif (self.board[i][j] != checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j)) and self.selected[1]) then
+                elseif (self.board[i][j] ~= checker.EMPTY and self:collidepoint(self:find_board_coordinates(i, j)) and self.selected[1]) then
                     self.selected = {true, {i, j}}
                 end
             end
@@ -53,7 +53,7 @@ function PlayState:update(dt)
 end
 
 function PlayState:render()
-
+    self:draw_board(self.board)
 end
 
 function PlayState:find_board_coordinates(i, j)
@@ -86,9 +86,8 @@ function PlayState:draw_board(board)
     local tile_size = 80
     local tile_origin = {VIRTUAL_WIDTH / 2 - (1.5 * tile_size),
                         VIRTUAL_HEIGHT / 2 - (1.5 * tile_size)}
-    local tiles = {}
+
     for i = 1, 8 do
-        local row = {}
         for j = 1, 8 do
             -- Define the rectangle
             local rect = {
@@ -105,17 +104,17 @@ function PlayState:draw_board(board)
             if board[i][j] ~= checker.EMPTY then
                 love.graphics.setFont(gFonts['medium'])
                 if board[i][j] == checker.X then
-                    love.graphics.setColor(unpack(colors.X))
+                    love.graphics.setColor(table.unpack(colors.X))
                     love.graphics.circle(rect.x + 40, rect.y + 40, 40)
                 elseif board[i][j] == checker.O then
-                    love.graphics.setColor(unpack(colors.O))
+                    love.graphics.setColor(table.unpack(colors.O))
                     love.graphics.circle(rect.x + 40, rect.y + 40, 40)  
                 elseif board[i][j] == checker.X_KING then
-                    love.graphics.setColor(unpack(colors.X))
+                    love.graphics.setColor(table.unpack(colors.X))
                     love.graphics.circle(rect.x + 40, rect.y + 40, 40)
                     love.graphics.print("K", rect.x + 40, rect.y + 40)
                 elseif board[i][j] == checker.O_KING then
-                    love.graphics.setColor(unpack(colors.O))
+                    love.graphics.setColor(table.unpack(colors.O))
                     love.graphics.circle(rect.x + 40, rect.y + 40, 40)
                     love.graphics.print("K", rect.x + 40, rect.y + 40)
                 end

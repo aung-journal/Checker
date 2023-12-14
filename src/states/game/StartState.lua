@@ -5,9 +5,7 @@ function StartState:init()
         "Play First",
         "Play Second"
     }
-
     self.currentMenuItem = 1
-    self.user = None
 end
 
 function StartState:update(dt)

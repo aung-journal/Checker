@@ -52,6 +52,7 @@ function love.update(dt)
     Control.update(dt)
     gStateMachine:update(dt)
 
+    love.keyboard.keysPressed = {}
     love.mouse.keysPressed = {}
 end
 
